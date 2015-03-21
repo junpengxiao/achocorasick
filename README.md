@@ -7,9 +7,7 @@ type Matcher struct {
 	count int
 }
 ```
-**Notice** the `Search` function below will only return the longest matches and won't return overlap matchers. For example if "she,he" exists, and the string bshe will only return she's index. If "she,heh" exists, and the string is shehee, then she will be return, curtent node pointer will point to root immediately. Thus the left string is "hee" which doesn't exist heh. 
-
-##New Matcer
+#NewMatcher
 
 ```go
 func NewMatcher() *Matcher
