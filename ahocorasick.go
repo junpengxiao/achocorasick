@@ -75,6 +75,7 @@ func (this *Matcher) Search(str string) []Result {
 		if this.curNode.index == -1 {
 			continue
 		}
+		//adding matches into recturn array. To get all matches, just remove following condition sentences and put newMatch into return results.
 		x, err := result.Peek()
 		newMatch := Result{StrIndex : i - this.dictlen[this.curNode.index] + 1, DictIndex : this.curNode.index}
 		if err == nil {
