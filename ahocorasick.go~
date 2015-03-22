@@ -1,7 +1,6 @@
 package ahocorasick
 
 import "github.com/tonyshaw/queue"
-import "github.com/tonyshaw/stack"
 
 const minilmt = 3
 const fulllmt = 128
@@ -13,10 +12,6 @@ type node struct {
 	prefix *string
 	index int
 	fullmode bool
-}
-
-type Result struct {
-	StrIndex, DictIndex int
 }
 
 func newNode() *node {
@@ -34,7 +29,6 @@ func newNode() *node {
 type Matcher struct {
 	root,curNode *node
 	count int
-	dictlen []int
 }
 
 func NewMatcher() *Matcher {
@@ -42,70 +36,37 @@ func NewMatcher() *Matcher {
 		root : newNode(),
 		curNode : nil,
 		count : 1,
-		dictlen : nil,
 	}
 }
 
-func (this *Matcher) Search(str string) []Result {
-	this.curNode = this.root
-	result := stack.NewStack(1024)
-	for i,ch := range str  {
-		for ; ; this.curNode = this.curNode.fail {
-			if this.curNode.fullmode {
-				if this.curNode.fullchild[int(ch)] != nil {
-					this.curNode = this.curNode.fullchild[int(ch)]
-					break
-				}
-			} else {
-				flag := false
-				for i, tmp := range this.curNode.childch {
-					if tmp == ch {
-						this.curNode = this.curNode.minichild[i]
-						flag = true
-					}
-				}
-				if flag {
-					break
-				}
-			}
-			if this.curNode == this.curNode.fail {
-				break
-			}
-		}
-		if this.curNode.index == -1 {
-			continue
-		}
-		x, err := result.Peek()
-		newMatch := Result{StrIndex : i - this.dictlen[this.curNode.index] + 1, DictIndex : this.curNode.index}
-		if err == nil {
-			tmp := x.(Result)
-			if tmp.StrIndex == newMatch.StrIndex {
-				result.Pop()
-				result.Push(newMatch)
-			}
-			if tmp.StrIndex + this.dictlen[tmp.DictIndex] <= newMatch.StrIndex {
-				result.Push(newMatch)
+func (this *Matcher) Search(ch rune) int {
+	for ;; {
+		if this.curNode.fullmode {
+			if this.curNode.fullchild[int(ch)] != nil {
+				this.curNode = this.curNode.fullchild[int(ch)]
+				return this.curNode.index
 			}
 		} else {
-			result.Push(newMatch)
+			for i, tmp := range this.curNode.childch {
+				if tmp == ch {
+					this.curNode = this.curNode.minichild[i]
+					return this.curNode.index
+				}
+			}
 		}
+		if this.curNode == this.root {
+			return this.curNode.index
+		}
+		this.curNode = this.curNode.fail
 	}
-	rect := make([]Result,result.Len())
-	for ;result.Len() != 0; {
-		x, _ := result.Pop()
-		rect[result.Len()] = x.(Result)
-	}
-	return rect
 }		
 
 func (this *Matcher) Build(dictionary []string) {
 	//set init state to root
 	this.curNode = this.root
 	//first build the trie
-	this.dictlen = make([]int, len(dictionary))
 	for i, str := range dictionary {
 		curNode := this.root
-		this.dictlen[i] = len(dictionary[i])
 		for _, ch := range str {
 			curNode = curNode.insert(ch, &this.count)
 		}

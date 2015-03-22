@@ -9,6 +9,7 @@ func printNode(n *node) {
 	for _,ch := range n.childch {
 		fmt.Printf("%c ",ch)
 	}
+	fmt.Println("Index ", n.index)
 	fmt.Println()
 }
 
@@ -38,24 +39,23 @@ func TestBuild(t *testing.T) {
 	PrintNode(matcher.root.minichild[1].minichild[0])
 	PrintNode(matcher.root.minichild[0].minichild[1].minichild[0])
 	PrintNode(matcher.root.minichild[0].minichild[1].minichild[1])*/
-	teststr := "yasherhs"
-	for i,ch := range teststr {
-		index := matcher.Search(ch)
-		if i == 4  {
-			if index != 1 {
-				t.Errorf("Match 'he' position is not right")
-			}
-			continue
-		}
-		if i == 5 {
-			if index != 4 {
-				t.Errorf("Match 'her' position is not right")
-			}
-			continue
-		}
-		if index != -1 {
-			t.Errorf("Match is not right in : ", i)
-		}
+	
+
+	result := matcher.Search("yasherhs")
+
+	if len(result) != 1 {
+		t.Errorf("1st : The length of result is not correct", len(result))
+	}
+	if result[0].StrIndex != 2 || result[0].DictIndex != 1 {
+		t.Errorf("1st : The index of result is not correct", result[0])
+	}
+
+	result = matcher.Search("aahersfdf")
+	if len(result) != 1 {
+		t.Errorf("2nd : The length of result is not correct", len(result))
+	}
+	if result[0].StrIndex != 2 || result[0].DictIndex != 4 {
+		t.Errorf("2nd : The index of result is not correct", result[0])
 	}
 }
 
